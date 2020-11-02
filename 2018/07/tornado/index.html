@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="en">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="tornado.md1思路: 基于[Tornado]异步io实现异步非阻塞长链接。  本文作者为简书-melo的微博 / 掘金-melo的微博Github-meloalright / Medium-@meloalright转载请注明出处哦。  1.扫码登录需求1234部门项目需要实现一个APP扫码即可在PC端实现登录的需求。结合部门内部的资源协调，适合使用一个异步io的框架实现简单扫码登录接口快速">
+<meta property="og:type" content="article">
+<meta property="og:title" content="meloalright-io">
+<meta property="og:url" content="https://meloalright.github.io/2018/07/tornado/index.html">
+<meta property="og:site_name" content="meloalright-io">
+<meta property="og:description" content="tornado.md1思路: 基于[Tornado]异步io实现异步非阻塞长链接。  本文作者为简书-melo的微博 / 掘金-melo的微博Github-meloalright / Medium-@meloalright转载请注明出处哦。  1.扫码登录需求1234部门项目需要实现一个APP扫码即可在PC端实现登录的需求。结合部门内部的资源协调，适合使用一个异步io的框架实现简单扫码登录接口快速">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2018-07-26T06:50:24.893Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="meloalright-io">
+<meta name="twitter:description" content="tornado.md1思路: 基于[Tornado]异步io实现异步非阻塞长链接。  本文作者为简书-melo的微博 / 掘金-melo的微博Github-meloalright / Medium-@meloalright转载请注明出处哦。  1.扫码登录需求1234部门项目需要实现一个APP扫码即可在PC端实现登录的需求。结合部门内部的资源协调，适合使用一个异步io的框架实现简单扫码登录接口快速">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://meloalright.github.io/2018/07/tornado/"/>
+
+
+
+
+
+  <title> | meloalright-io</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="en">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">meloalright-io</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://meloalright.github.io/2018/07/tornado/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="meloalright">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="meloalright-io">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline"></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-26T14:50:23+08:00">
+                2018-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>tornado.md<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">思路: 基于[Tornado]异步io实现异步非阻塞长链接。</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>本文作者为<br><a href="https://www.jianshu.com/users/f6323e43dd6c" target="_blank" rel="noopener">简书-melo的微博</a> / <a href="https://juejin.im/user/579a313f5bbb500064c4a697" target="_blank" rel="noopener">掘金-melo的微博</a><br><a href="https://github.com/meloalright" target="_blank" rel="noopener">Github-meloalright</a> / <a href="https://medium.com/@meloalright" target="_blank" rel="noopener">Medium-@meloalright</a><br>转载请注明出处哦。</p>
+</blockquote>
+<h2 id="1-扫码登录需求"><a href="#1-扫码登录需求" class="headerlink" title="1.扫码登录需求"></a>1.扫码登录需求</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">部门项目需要实现一个APP扫码即可在PC端实现登录的需求。</span><br><span class="line">结合部门内部的资源协调，适合使用一个异步io的框架实现简单扫码登录接口快速上线。</span><br><span class="line">初期考虑使用[node.js]或者[Tornado]</span><br><span class="line">最终选择使用[Tornado]</span><br></pre></td></tr></table></figure>
+<h2 id="2-实现思路"><a href="#2-实现思路" class="headerlink" title="2.实现思路"></a>2.实现思路</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">- 基于 uuid.uuid4() 为二维码生成唯一 uuid</span><br><span class="line">- 基于 tornado.locks 实现长链接 handler 协程的通知等待</span><br><span class="line">- 基于 <span class="keyword">await</span> http_client.fetch 实现扫码确认请求handler的内部校验接口调用</span><br></pre></td></tr></table></figure>
+<h2 id="3-代码结构"><a href="#3-代码结构" class="headerlink" title="3.代码结构"></a>3.代码结构</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">│ </span><br><span class="line">│   <span class="comment"># @ Python Tornado 工程代码</span></span><br><span class="line">│ </span><br><span class="line">├── tornado-project</span><br><span class="line">│   │</span><br><span class="line">│   │   <span class="comment"># @ 各种handler放这里</span></span><br><span class="line">│   │</span><br><span class="line">│   ├── handlers</span><br><span class="line">│   │   │ </span><br><span class="line">│   │   ├── __init__.py</span><br><span class="line">│   │   │ </span><br><span class="line">│   │   ├── confirm_handler.py <span class="comment"># 确认扫码请求的handler</span></span><br><span class="line">│   │   │ </span><br><span class="line">│   │   │ </span><br><span class="line">│   │   ├── uuid_handler.py <span class="comment"># 获取uuid请求的handler</span></span><br><span class="line">│   │   │ </span><br><span class="line">│   │   ├── wait_handler.py <span class="comment"># 长链接请求的handler</span></span><br><span class="line">│   │   │ </span><br><span class="line">│   │   │  <span class="comment"># @ redis_map 放这里</span></span><br><span class="line">│   │   │ </span><br><span class="line">│   │   └── redis_map </span><br><span class="line">│   │       ├── __init__.py</span><br><span class="line">│   │       └── redis_map.py</span><br><span class="line">│   │ </span><br><span class="line">│   ├── main.py <span class="comment"># 入口文件</span></span><br><span class="line">│   │ </span><br><span class="line">│   └── requirements.txt <span class="comment"># 项目依赖</span></span><br></pre></td></tr></table></figure>
+<h2 id="4-wait-handler"><a href="#4-wait-handler" class="headerlink" title="4. wait_handler"></a>4. wait_handler</h2><p><code>/wait 长链接接口</code>   </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WaitHandler</span><span class="params">(tornado.web.RequestHandler)</span>:</span></span><br><span class="line">    <span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">post</span><span class="params">(self)</span>:</span></span><br><span class="line">        data = tornado.escape.json_decode(self.request.body)</span><br><span class="line">        cursor = data[<span class="string">"cursor"</span>]</span><br><span class="line"></span><br><span class="line">        status = int(RedisMap.get_status(cursor))</span><br><span class="line">        <span class="string">'''</span></span><br><span class="line"><span class="string">        some code ...</span></span><br><span class="line"><span class="string">        '''</span></span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> status &lt; <span class="number">2</span> <span class="keyword">and</span> status &gt; <span class="number">-1</span>:</span><br><span class="line">            self.wait_future = RedisMap.wait()</span><br><span class="line"></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                <span class="keyword">await</span> self.wait_future</span><br><span class="line">            <span class="keyword">except</span> asyncio.CancelledError:</span><br><span class="line">                <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">            status = int(RedisMap.get_status(cursor))</span><br><span class="line">            <span class="string">'''</span></span><br><span class="line"><span class="string">            some code ...</span></span><br><span class="line"><span class="string">            '''</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> self.request.connection.stream.closed():</span><br><span class="line">            RedisMap.delete(cursor) <span class="comment"># delete</span></span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">        RedisMap.delete(cursor) <span class="comment"># delete</span></span><br><span class="line">        self.write(&#123;</span><br><span class="line">            <span class="string">"status"</span>: status </span><br><span class="line">            <span class="string">'''</span></span><br><span class="line"><span class="string">            other key value ...</span></span><br><span class="line"><span class="string">            '''</span> </span><br><span class="line">        &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">on_connection_close</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.wait_future.cancel()</span><br></pre></td></tr></table></figure>
+<h2 id="5-confirm-handler"><a href="#5-confirm-handler" class="headerlink" title="5. confirm_handler"></a>5. confirm_handler</h2><p><code>/confirm 确认扫码登录接口</code>      </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ConfirmHandler</span><span class="params">(tornado.web.RequestHandler)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">auth</span><span class="params">(self, param)</span>:</span></span><br><span class="line">        http_client = tornado.httpclient.AsyncHTTPClient()</span><br><span class="line">        response = <span class="keyword">await</span> http_client.fetch(<span class="string">"An auth uri blau blau ..."</span> , headers=param)</span><br><span class="line">        <span class="string">'''</span></span><br><span class="line"><span class="string">        some code ...</span></span><br><span class="line"><span class="string">        '''</span></span><br><span class="line">        response_data = tornado.escape.json_decode(response.body)</span><br><span class="line">        <span class="keyword">return</span> response_data[<span class="string">'status'</span>] <span class="keyword">is</span> <span class="number">200</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">async</span> <span class="function"><span class="keyword">def</span> <span class="title">post</span><span class="params">(self)</span>:</span></span><br><span class="line">        data = tornado.escape.json_decode(self.request.body)</span><br><span class="line">        authorization = data[<span class="string">"authorization"</span>]</span><br><span class="line">        <span class="string">'''</span></span><br><span class="line"><span class="string">        some code ...</span></span><br><span class="line"><span class="string">        '''</span></span><br><span class="line">        is_auth = <span class="keyword">await</span> self.auth(authorization)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> is_auth:</span><br><span class="line">            self.write(&#123;</span><br><span class="line">                <span class="string">"status"</span>: <span class="number">401</span>,</span><br><span class="line">            &#125;)</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            self.write(&#123;</span><br><span class="line">                <span class="string">"status"</span>: <span class="number">200</span></span><br><span class="line">                &#125;)</span><br></pre></td></tr></table></figure>
+<h2 id="结语"><a href="#结语" class="headerlink" title="结语:"></a>结语:</h2><blockquote>
+<p>代码只是示例 仅供参考哈(∩_∩)  </p>
+</blockquote>
+<h2 id="鸣谢"><a href="#鸣谢" class="headerlink" title="鸣谢:"></a>鸣谢:</h2><blockquote>
+<p>参考文档:<br><a href="http://www.tornadoweb.org/en/stable/" target="_blank" rel="noopener">tornadoweb.org</a><br><a href="http://tornado-zh.readthedocs.io/zh/latest/locks.html" target="_blank" rel="noopener">tornado.locks – 同步原语</a>   </p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/07/vue-ins-progress-bar/" rel="next" title="这才是我想要的彩虹进度条">
+                <i class="fa fa-chevron-left"></i> 这才是我想要的彩虹进度条
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">meloalright</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-扫码登录需求"><span class="nav-number">1.</span> <span class="nav-text">1.扫码登录需求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-实现思路"><span class="nav-number">2.</span> <span class="nav-text">2.实现思路</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-代码结构"><span class="nav-number">3.</span> <span class="nav-text">3.代码结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-wait-handler"><span class="nav-number">4.</span> <span class="nav-text">4. wait_handler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-confirm-handler"><span class="nav-number">5.</span> <span class="nav-text">5. confirm_handler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#结语"><span class="nav-number">6.</span> <span class="nav-text">结语:</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#鸣谢"><span class="nav-number">7.</span> <span class="nav-text">鸣谢:</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">meloalright</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
