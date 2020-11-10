@@ -243,7 +243,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://meloalright.github.io/2016/12/wireless/">
+    <link itemprop="mainEntityOfPage" href="https://meloalright.github.io/2016/12/go-and-cross-platform/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="meloalright">
@@ -262,7 +262,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2016/12/wireless/" itemprop="url">狐厂鹅厂无线端</a></h2>
+                <a class="post-title-link" href="/2016/12/go-and-cross-platform/" itemprop="url">Go & Cross Platform</a></h2>
         
 
         <div class="post-meta">
@@ -293,8 +293,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2016/12/wireless/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2016/12/wireless/" itemprop="commentCount"></span>
+                <a href="/2016/12/go-and-cross-platform/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2016/12/go-and-cross-platform/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -323,7 +323,8 @@
 
       
         
-          <h2 id="OS"><a href="#OS" class="headerlink" title="OS"></a>OS</h2><h3 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cache狭义指的是CPU和RAM主存之间的Cache(利用比较昂贵的SRAM) 而且在内存和硬盘之间也有Cache（磁盘缓存） 乃至在硬盘与网络之间也有某种意义上的Cache(如浏览器缓存) 当然也有代码级缓存(某些斐波那契算法) (内存包括ROM RAM Cache)</span><br></pre></td></tr></table></figure>
+          <h2 id="Cache"><a href="#Cache" class="headerlink" title="Cache"></a>Cache</h2><h3 id="布隆过滤器"><a href="#布隆过滤器" class="headerlink" title="布隆过滤器"></a>布隆过滤器</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">优点: </span><br><span class="line">1.布隆过滤器存储空间和插入/查询时间都是常数</span><br><span class="line">2.布隆过滤器不需要存储元素本身 在某些对保密要求非常严格的场合有优势</span><br><span class="line">3.可以表示全集 (其它任何数据结构都不能)</span><br><span class="line">4.同一组散列函数的两个布隆过滤器的交并运算可以使用位操作进行</span><br><span class="line"></span><br><span class="line">缺点: </span><br><span class="line">1.随着存入的元素数量增加误算率随之增加 </span><br><span class="line">2.不能删除(首先我们必须保证删除的元素的确在布隆过滤器里面 这一点单凭这个过滤器是无法保证的)</span><br></pre></td></tr></table></figure>
+<h2 id="OS"><a href="#OS" class="headerlink" title="OS"></a>OS</h2><h3 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cache狭义指的是CPU和RAM主存之间的Cache(利用比较昂贵的SRAM) 而且在内存和硬盘之间也有Cache（磁盘缓存） 乃至在硬盘与网络之间也有某种意义上的Cache(如浏览器缓存) 当然也有代码级缓存(某些斐波那契算法) (内存包括ROM RAM Cache)</span><br></pre></td></tr></table></figure>
 <h3 id="ASCII"><a href="#ASCII" class="headerlink" title="ASCII"></a>ASCII</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">ASCII = 美国信息交换标准代码</span><br><span class="line"></span><br><span class="line">标准: 使用7位二进制数来表示所有的 大写/小写字母 数字0-9 标点符号  美式英语特殊控制字符</span><br><span class="line"></span><br><span class="line">0 - NUL空字符</span><br><span class="line">48 - 数字0</span><br><span class="line">65 - A</span><br><span class="line">97 - a</span><br><span class="line"></span><br><span class="line">其最高位(b7) == 奇偶校验位:</span><br><span class="line">所谓奇偶校验 是指在代码传送过程中用来检验是否出现错误的一种方法 一般分奇校验和偶校验两种。</span><br><span class="line">奇校验规定: 正确的代码一个字节中1的个数必须是奇数，若非奇数，则在最高位b7添1</span><br><span class="line">偶校验规定: 正确的代码一个字节中1的个数必须是偶数，若非偶数，则在最高位b7添1</span><br></pre></td></tr></table></figure>
 <h3 id="unicode"><a href="#unicode" class="headerlink" title="unicode"></a>unicode</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Unicode=国际码=国际字符和二进制数字的对应关系</span><br><span class="line">Unicode 只是一个符号集 它只规定了符号的二进制代码 却没有规定这个二进制代码应该如何存储</span><br></pre></td></tr></table></figure>
 <h3 id="UTF-8"><a href="#UTF-8" class="headerlink" title="UTF-8"></a>UTF-8</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UTF<span class="number">-8</span> 就是在互联网上使用最广的一种 Unicode 的实现方式。</span><br></pre></td></tr></table></figure>
@@ -332,7 +333,7 @@
 <h3 id="URL-编码"><a href="#URL-编码" class="headerlink" title="URL 编码"></a>URL 编码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">URL编码 == 百分号编码</span><br><span class="line"></span><br><span class="line">对以下类型字符进行编码:</span><br><span class="line">1.引起歧义的字符 (如 value 字符串中包含了 = 或者 &amp; 比附宝洁公司的简称为P&amp;G)</span><br><span class="line">2.非法字符 (URL 的编码格式采用的是 ASCII 码 而不是 Unicode 这也就是说你不能在 URL 中包含任何非 ASCII 字符 例如中文)</span><br></pre></td></tr></table></figure>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2016/12/wireless/#more" rel="contents">
+            <a class="btn" href="/2016/12/go-and-cross-platform/#more" rel="contents">
               Read more &raquo;
             </a>
           </div>
@@ -464,7 +465,7 @@
           
           
             <div class="post-gallery-row">
-              <a class="post-gallery-img fancybox" href="/images/post/2015/1st-startups.jpg" rel="gallery_ckeipankc0000h33agmynchb9" itemscope itemtype="http://schema.org/ImageObject" itemprop="url">
+              <a class="post-gallery-img fancybox" href="/images/post/2015/1st-startups.jpg" rel="gallery_ckf3dgx0c00005dlwd7g7hjgt" itemscope itemtype="http://schema.org/ImageObject" itemprop="url">
                 <img src="/images/post/2015/1st-startups.jpg" itemprop="contentUrl">
               </a>
             
