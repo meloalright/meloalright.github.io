@@ -5,12 +5,20 @@
 
 ```shell
 $ npm install -g hexo
-$ cd blog && npm install && hexo s
+```
+
+```shell
+$ cd _doc
+```
+
+```shell
+$ npm i
+$ hexo s
 ```
 
 
 ## Build
 
 ```shell
-$ ./deploy.sh
+$ hexo g
 ```
